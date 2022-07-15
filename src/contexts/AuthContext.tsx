@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState } from 'react';
 import axios from 'axios';
+import { Navigate } from 'react-router-dom';
 import { IUser } from '../interfaces/IUser';
 
 interface IAuthState {
@@ -30,6 +31,13 @@ const useValue = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [wrongCredsError, setWrongCredsError] = useState(false);
+
+  const privateRoute = (element: JSX.Element) => {
+    if (authState.authenticated) {
+      return (element);
+    }
+    return (<Navigate to="/" />);
+  };
 
   const fakeLogin = (creds: FormData, action?: () => void) => {
     setUser({
