@@ -15,7 +15,7 @@ interface ILoginResponse {
   }
 }
 
-const useValue = () => {
+const useValue = (baseUrl: string) => {
   const [authState, setAuthState] = useState<IAuthState>({
     accessToken: null,
     authenticated: false,
@@ -62,11 +62,11 @@ const useValue = () => {
     setIsLoading(true);
     axios.defaults.withCredentials = true;
     await axios.get(
-      'http://localhost:8000/sanctum/csrf-cookie',
+      `${baseUrl}/sanctum/csrf-cookie`,
       { headers: { 'ngrok-skip-browser-warning': 'value' } },
     )
       .then(() => {
-        axios.post<ILoginResponse>('http://localhost:8000/externalLogin', {
+        axios.post<ILoginResponse>(`${baseUrl}/externalLogin`, {
           email: creds.get('email'),
           password: creds.get('password'),
         }, { headers: { 'ngrok-skip-browser-warning': 'value' } })
@@ -97,6 +97,7 @@ const useValue = () => {
     user,
     isLoading,
     wrongCredsError,
+    privateRoute,
     login,
     logout,
   };
@@ -105,10 +106,14 @@ const useValue = () => {
 const AuthContext = createContext({} as ReturnType<typeof useValue>);
 const { Provider } = AuthContext;
 
-const AuthProvider: React.FC<React.HTMLProps<HTMLDivElement>> = ({
-  children,
+interface AuthProviderProps extends React.HTMLProps<HTMLDivElement> {
+  baseUrl: string
+}
+
+const AuthProvider: React.FC<AuthProviderProps> = ({
+  children, baseUrl
 }) => (
-  <Provider value={useValue()}>
+  <Provider value={useValue(baseUrl)}>
     {children}
   </Provider>
 );
